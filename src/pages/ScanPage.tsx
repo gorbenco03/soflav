@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 // @ts-ignore
 import QrScanner from 'react-qr-scanner';
 
-
 const ScanPage: React.FC = () => {
   const [scanned, setScanned] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState<'success' | 'error' | null>(null);
@@ -17,7 +16,7 @@ const ScanPage: React.FC = () => {
         const parsedData = JSON.parse(data);
         console.log('Parsed data:', parsedData);
 
-        const response = await fetch("http://192.168.3.35:3000/verify-ticket", {
+        const response = await fetch("https://lavial.icu/verify-ticket", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -57,6 +56,7 @@ const ScanPage: React.FC = () => {
             style={previewStyle}
             onError={(err: any) => console.error(err)}
             onScan={handleBarCodeScanned}
+            facingMode="environment" // Adaugă această linie pentru a folosi camera din spate
           />
         </div>
       ) : (
