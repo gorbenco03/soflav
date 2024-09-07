@@ -1,25 +1,29 @@
 import React from 'react';
-import logo from './logo.svg';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import LoginPage from './pages/LoginPage';
+import ReservationPage from './pages/ReservationPage';
+import ScanPage from './pages/ScanPage'; // Asigură-te că ai importul corect
 import './App.css';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <div className="App">
+        <Routes>
+          {/* Ruta pentru Login */}
+          <Route path="/" element={<LoginPage />} />
+
+          {/* Ruta pentru ReservationPage */}
+          <Route path="/reservation" element={<ReservationPage />} />
+
+          {/* Ruta pentru ScanPage */}
+          <Route path="/scan" element={<ScanPage />} />
+
+          {/* Rută de fallback pentru orice URL nevalid */}
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
