@@ -1,66 +1,80 @@
-import React, { useState } from 'react';
-// @ts-ignore
-import QrScanner from 'react-qr-scanner';
+import React, { useEffect, useState, useRef } from 'react';
+import { Html5QrcodeScanner, Html5QrcodeScanType } from "html5-qrcode";
 
 const ScanPage: React.FC = () => {
   const [scanned, setScanned] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState<'success' | 'error' | null>(null);
   const [reservationDetails, setReservationDetails] = useState<any>(null);
-  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment'); // Starea pentru modul camerei
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment');
+  const qrCodeRegionRef = useRef<HTMLDivElement | null>(null);
 
-  const handleBarCodeScanned = async (data: any) => {
-    if (data) {
-      setScanned(true);
-      console.log(`Scanned barcode with data ${data}`);
-      try {
-        const parsedData = JSON.parse(data);
-        console.log('Parsed data:', parsedData);
+  useEffect(() => {
+    if (qrCodeRegionRef.current) {
+      const config = {
+        fps: 10,
+        qrbox: { width: 250, height: 250 },
+        rememberLastUsedCamera: true,
+        supportedScanTypes: ["camera"] as unknown as Html5QrcodeScanType[], // Folosește un array mutabil
+      };
 
-        const response = await fetch("https://lavial.icu/verify-ticket", {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ uniq_id: parsedData.uniq_id }),
-        });
+      const html5QrcodeScanner = new Html5QrcodeScanner(
+        "qr-reader",
+        config,
+        /* verbose= */ false
+      );
 
-        console.log('Server response:', response);
+      html5QrcodeScanner.render(handleBarCodeScanned, handleError);
 
-        if (response.ok) {
-          const result = await response.json();
-          setVerificationStatus('success');
-          console.log('Travel data:', result.travel);
-          setReservationDetails(result.travel);
-        } else {
-          console.log('Verification error, status:', response.status);
-          setVerificationStatus('error');
-        }
-      } catch (error) {
-        console.error('Error during ticket verification:', error);
+      return () => {
+        html5QrcodeScanner.clear().catch(console.error);
+      };
+    }
+  }, [facingMode]);
+
+  const handleBarCodeScanned = async (decodedText: string, decodedResult: any) => {
+    setScanned(true);
+    console.log(`Scanned barcode with data ${decodedText}`);
+    try {
+      const parsedData = JSON.parse(decodedText);
+      console.log('Parsed data:', parsedData);
+
+      const response = await fetch("https://lavial.icu/verify-ticket", {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ uniq_id: parsedData.uniq_id }),
+      });
+
+      console.log('Server response:', response);
+
+      if (response.ok) {
+        const result = await response.json();
+        setVerificationStatus('success');
+        console.log('Travel data:', result.travel);
+        setReservationDetails(result.travel);
+      } else {
+        console.log('Verification error, status:', response.status);
         setVerificationStatus('error');
       }
+    } catch (error) {
+      console.error('Error during ticket verification:', error);
+      setVerificationStatus('error');
     }
   };
 
-  const previewStyle = {
-    height: 240,
-    width: 320,
+  const handleError = (error: any) => {
+    console.error("QR Code scan error", error);
   };
 
   return (
     <div className="flex flex-col items-center p-4 bg-gray-100 min-h-screen">
       {!scanned ? (
         <div className="w-full max-w-md mb-4">
-          <QrScanner
-            delay={300}
-            style={previewStyle}
-            onError={(err: any) => console.error(err)}
-            onScan={handleBarCodeScanned}
-            facingMode={facingMode}  // Folosește starea pentru a controla modul camerei
-          />
+          <div id="qr-reader" style={{ width: "100%" }} ref={qrCodeRegionRef}></div>
           <button
             className="mt-4 py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700"
-            onClick={() => setFacingMode(facingMode === 'environment' ? 'user' : 'environment')} // Schimbă între față și spate
+            onClick={() => setFacingMode(facingMode === 'environment' ? 'user' : 'environment')}
           >
             Schimbă Camera
           </button>
