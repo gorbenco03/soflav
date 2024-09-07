@@ -1,9 +1,10 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import LoginPage from './pages/LoginPage';
-import ReservationPage from './pages/ReservationPage';
 import ScanPage from './pages/ScanPage'; // Asigură-te că ai importul corect
+import ReservationAndPricePage from './pages/ReservationPage';
 import './App.css';
+import ReservationPage from './pages/ReservationPage';
 
 function App() {
   return (
