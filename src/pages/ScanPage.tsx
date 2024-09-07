@@ -1,4 +1,3 @@
-// src/pages/ScanPage.tsx
 import React, { useState } from 'react';
 // @ts-ignore
 import QrScanner from 'react-qr-scanner';
@@ -7,6 +6,7 @@ const ScanPage: React.FC = () => {
   const [scanned, setScanned] = useState(false);
   const [verificationStatus, setVerificationStatus] = useState<'success' | 'error' | null>(null);
   const [reservationDetails, setReservationDetails] = useState<any>(null);
+  const [facingMode, setFacingMode] = useState<'user' | 'environment'>('environment'); // Starea pentru modul camerei
 
   const handleBarCodeScanned = async (data: any) => {
     if (data) {
@@ -56,8 +56,14 @@ const ScanPage: React.FC = () => {
             style={previewStyle}
             onError={(err: any) => console.error(err)}
             onScan={handleBarCodeScanned}
-            facingMode="environment" // Adaugă această linie pentru a folosi camera din spate
+            facingMode={facingMode}  // Folosește starea pentru a controla modul camerei
           />
+          <button
+            className="mt-4 py-2 px-4 bg-blue-500 text-white rounded hover:bg-blue-700"
+            onClick={() => setFacingMode(facingMode === 'environment' ? 'user' : 'environment')} // Schimbă între față și spate
+          >
+            Schimbă Camera
+          </button>
         </div>
       ) : (
         <div className="w-full max-w-md p-4 bg-white rounded shadow-lg">
